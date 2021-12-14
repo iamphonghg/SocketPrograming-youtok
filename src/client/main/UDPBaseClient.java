@@ -3,26 +3,38 @@ package client.main;
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class UDPBaseClient {
+    public static DatagramSocket socket;
+
+    public UDPBaseClient() throws SocketException {
+        socket = new DatagramSocket();
+
+    }
+
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
-        DatagramSocket datagramSocket = new DatagramSocket();
 
         InetAddress ip = InetAddress.getLocalHost();
-        byte buff[] = null;
-
+        byte[] bufferSend = null;
+        byte[] bufferReceive = new byte[1024];
         while (true) {
-            String inp = scanner.nextLine();
+            String input = scanner.nextLine();
+            bufferSend = input.getBytes();
 
-            buff = inp.getBytes();
-
-            DatagramPacket DpSend = new DatagramPacket(buff, buff.length, ip, 9999);
-            datagramSocket.send(DpSend);
-
-            if (inp.equals("bye"))
+            DatagramPacket datagramPacketSend = new DatagramPacket(bufferSend, bufferSend.length, ip, 9999);
+            socket.send(datagramPacketSend);
+            if (input.equals("bye"))
                 break;
+
+            DatagramPacket datagramPacketReceive = new DatagramPacket(bufferReceive, bufferReceive.length);
+            socket.receive(datagramPacketReceive);
+            String response = new String(bufferReceive, 0, datagramPacketReceive.getLength());
+            System.out.println(response);
+            System.out.println(input);
+
         }
     }
 }

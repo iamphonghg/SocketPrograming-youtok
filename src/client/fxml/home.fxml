@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="702.0" prefWidth="1067.0" style="-fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controller.HomeController">
+   <center>
+      <Label fx:id="labelTest" text="Homepage" BorderPane.alignment="CENTER">
+         <font>
+            <Font size="47.0" />
+         </font>
+      </Label>
+   </center>
+</BorderPane>

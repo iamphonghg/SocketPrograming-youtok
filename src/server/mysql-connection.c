@@ -8,8 +8,8 @@ int main() {
 
     char *server = "localhost";
     char *user = "root";
-    char *password = "2912"; /* set me first */
-    char *database = "mysql";
+    char *password = ""; /* set me first */
+    char *database = "youtok";
 
     conn = mysql_init(NULL);
 
