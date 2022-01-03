@@ -1,4 +1,14 @@
 - to start mysql:
   sudo mysql -u root -p
-  Enter password: 
+  Enter password:
 - mysql commands end with ;
+
+- mysql command:
+  + show tables;
+  + show databases;
+  + use database_name;
+  + drop database database_name;
+  + create database database_name;
+
+- install json c:
+link: https://www.youtube.com/watch?v=dQyXuFWylm4

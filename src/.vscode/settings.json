@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "ctype.h": "c",
+    "mysql.h": "c"
+  }
+}

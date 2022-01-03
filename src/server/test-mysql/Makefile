@@ -1,2 +1,2 @@
-test:	main.c
-		gcc -o test main.c `mysql_config --cflags --libs`
+seed:	seed.c
+		gcc -o seed seed.c `mysql_config --cflags --libs`

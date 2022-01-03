@@ -1,0 +1,30 @@
+{
+  "head": "login",
+  "body":
+  {
+    "username": "admin",
+    "password": "123123"
+  }
+}
+
+{
+  "head": "login_response",
+  "body":
+  {
+    "status": "true",
+    "user":
+    {
+      "full_name": "Admin",
+      "id": "1"
+    }
+  }
+}
+
+{
+  "head": "login_response",
+  "body":
+  {
+    "status": "false",
+  }
+}
+

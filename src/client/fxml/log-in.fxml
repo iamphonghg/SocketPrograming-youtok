@@ -14,31 +14,54 @@
    <center>
       <VBox alignment="CENTER" prefHeight="606.0" prefWidth="982.0" style="-fx-background-color: #ffffff;" BorderPane.alignment="CENTER">
          <children>
-            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="53.0" prefWidth="301.0" text="Sign in to Youtok">
+            <Label fx:id="resultLabel" text="Result">
                <font>
-                  <Font size="30.0" />
+                  <Font name="SofiaProRegular" size="32.0" />
+               </font>
+            </Label>
+            <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="53.0" prefWidth="301.0" text="Log in to Youtok">
+               <font>
+                  <Font name="SofiaProRegular" size="27.0" />
                </font>
             </Label>
             <HBox alignment="CENTER" prefHeight="40.0" prefWidth="923.0">
                <children>
-                  <Label prefHeight="16.0" prefWidth="84.0" text="Username:" />
-                  <TextField />
+                  <Label fx:id="usernameLabel" prefHeight="16.0" prefWidth="84.0" text="Username:">
+                     <font>
+                        <Font name="SofiaProRegular" size="15.0" />
+                     </font></Label>
+                  <TextField fx:id="usernameInput">
+                     <font>
+                        <Font name="SofiaProRegular" size="15.0" />
+                     </font></TextField>
                </children>
             </HBox>
             <HBox alignment="CENTER" prefHeight="41.0" prefWidth="923.0">
                <children>
-                  <Label prefHeight="16.0" prefWidth="83.0" text="Password:" />
-                  <PasswordField />
+                  <Label fx:id="passwordLabel" prefHeight="16.0" prefWidth="83.0" text="Password:">
+                     <font>
+                        <Font name="SofiaProRegular" size="15.0" />
+                     </font></Label>
+                  <PasswordField fx:id="passwordInput">
+                     <font>
+                        <Font name="SofiaProRegular" size="15.0" />
+                     </font></PasswordField>
                </children>
             </HBox>
             <HBox alignment="CENTER" prefHeight="50.0" prefWidth="923.0">
                <children>
-                  <Button mnemonicParsing="false" text="Create account">
+                  <Button fx:id="createAccountButton" mnemonicParsing="false" text="Create account">
                      <HBox.margin>
                         <Insets right="20.0" />
                      </HBox.margin>
+                     <font>
+                        <Font name="SofiaProRegular" size="15.0" />
+                     </font>
                   </Button>
-                  <Button mnemonicParsing="false" text="Sign in" />
+                  <Button fx:id="logInButton" mnemonicParsing="false" onMouseClicked="#handleMouseClicks" text="Log in">
+                     <font>
+                        <Font name="SofiaProRegular" size="15.0" />
+                     </font></Button>
                </children>
             </HBox>
          </children>
