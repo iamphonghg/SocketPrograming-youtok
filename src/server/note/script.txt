@@ -12,4 +12,10 @@
 + output: boolean
 -- fetch video của current user:
 + input: user_id
-+ output: tất cả video 
++ output: tất cả video
+
+
+Nghiên:
+-- tìm kiếm video, 2 trường hợp, có hoặc không đăng nhập
+input: có đăng nhập thì có user_id, search_string
+output: list video tìm được có title chứa search_string (kiểm tra privacy)

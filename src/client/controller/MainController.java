@@ -34,7 +34,7 @@ public class MainController implements Initializable {
   @FXML
   private StackPane mainStackPane;
   @FXML
-  private BorderPane homeBorderPane;
+  public BorderPane homeBorderPane;
   @FXML
   private BorderPane loginBorderPane;
   @FXML

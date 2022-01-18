@@ -33,7 +33,7 @@
          <center>
             <HBox alignment="CENTER" prefHeight="79.0" prefWidth="727.0" BorderPane.alignment="CENTER">
                <children>
-                  <TextField fx:id="searchInput" prefHeight="82.0" prefWidth="429.0" promptText="Search videos..." style="-fx-border-radius: 92 0 0 92; -fx-background-radius: 28 0 0 28; -fx-background-color: #f1f1f2;">
+                  <TextField fx:id="searchInput" prefHeight="82.0" prefWidth="429.0" promptText="Search videos..." style="-fx-border-radius: 92 0 0 92; -fx-background-radius: 28 0 0 28; -fx-background-color: #f1f1f2; -fx-font-family: &quot;Sofia Pro&quot;; -fx-font-size: 20;">
                      <font>
                         <Font name="SofiaProRegular" size="25.0" />
                      </font>

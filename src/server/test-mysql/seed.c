@@ -124,4 +124,24 @@ void seedVideo(MYSQL *conn)
   {
     printf("Successfully added video\n");
   }
+
+  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (2, 'Lam giau khong kho', 'Bi kip lam giau cua thay Huan Hoa Hong', 'public', 'lamgiaukhongkho.mp4', 'mp4', 10248)"))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+  else
+  {
+    printf("Successfully added video\n");
+  }
+
+  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (2, 'Day con lam giau', 'Cach day con lam giau cua doanh nhan Hoang Trong Nghien', 'public', 'dayconlamgiau.mp4', 'mp4', 10248)"))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+  else
+  {
+    printf("Successfully added video\n");
+  }
 }

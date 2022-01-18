@@ -52,6 +52,5 @@ int main(int argc, char *argv[])
 
   g_print("stream ready at rtsp://127.0.0.1:%s/test\n", port);
   g_main_loop_run(loop);
-
   return 0;
 }

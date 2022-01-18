@@ -2,7 +2,7 @@
 gcc -o stream stream.c `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gstreamer-1.0`
 
 # execute code
-./stream "( filesrc location=\test.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 )"
+./stream "( filesrc location=\test.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 config-interval=1 ssrc=10000000 )"
 
 ffmpeg -fflags nobuffer \
  -rtsp_transport tcp \

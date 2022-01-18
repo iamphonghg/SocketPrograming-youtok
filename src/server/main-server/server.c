@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
   int len, n;
 
-  len = sizeof(cliaddr); //len is value/resuslt
+  len = sizeof(cliaddr); 
 
   for (;;)
   {
