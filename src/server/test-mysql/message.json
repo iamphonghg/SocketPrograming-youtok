@@ -3,7 +3,7 @@
   "body":
   {
     "username": "admin",
-    "password": "123123"
+    "password": "admin"
   }
 }
 
@@ -28,3 +28,42 @@
   }
 }
 
+{
+  "head": "fetch_all_videos",
+  "body": null
+}
+
+{
+  "head": "fetch_all_videos_response",
+  "body": {
+    "videos_list": [
+      {
+        "id": 1,
+        "title": "3 ngay lam chu mon Lap trinh mang",
+        "description":
+          "Huong dan vuot qua mon Lap trinh mang cua thay giao Hoang Trong Nghien",
+        "privacy": "public",
+        "filename": "Lamchulaptrinhmang.mp4"
+      },
+      {
+        "id": 2,
+        "title": "Huy diet giai tich",
+        "description":
+          "Qua mon giai tich de dang cung thay giao Hoang Gia Phong,
+          voi 5 nam kinh nghiem huy diet giai tich bach khoa",
+        "privacy": "public",
+        "filename": "huydietgiaitch.mp4"
+      }
+    ]
+  }
+}
+
+{
+  "head": "ready_upload",
+  "body": {
+    "user_id": 1,
+    "filename": "laptrinhmang.mp4",
+    "title": "3 ngay lam chu mon Lap trinh mang",
+    ""
+  }
+}

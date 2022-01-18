@@ -1,0 +1,15 @@
+-- fetch video khi khởi động ứng dụng:
++ input: none
++ output: tất cả video, ngoại trừ private
+-- fetch video sau khi đăng nhập
++ input: user_id
++ output: tất cả video, ngoại trừ private của user khác, bao gồm private video của current user
+-- khi ấn xem video trên homepage, kiểm tra xem người dùng hiện tại có quyền xem video đó không (trong trường hợp chủ video vừa thay đổi quyền truy cập nhưng trên homepage của người dùng khác vẫn đang hiển thị video đó):
++ input: user_id, video_id
++ output: boolean
+-- thay đổi quyền truy cập của video:
++ input: video_id, privacy
++ output: boolean
+-- fetch video của current user:
++ input: user_id
++ output: tất cả video 

@@ -1,26 +1,18 @@
 package client.controller;
 
-import client.main.UDPClient;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import model.User;
-import model.UserSession;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 
 
@@ -45,6 +37,15 @@ public class MainController implements Initializable {
   private BorderPane homeBorderPane;
   @FXML
   private BorderPane loginBorderPane;
+  @FXML
+  private BorderPane uploadBorderPane;
+  @FXML
+  public BorderPane watchVideoBorderPane;
+  public BorderPane uploadProcessBorderPane;
+
+  public static UploadProcessController uploadProcessController;
+  public static HomeController homeController;
+  public static WatchVideoController watchVideoController;
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -55,19 +56,49 @@ public class MainController implements Initializable {
     userMenuButton.managedProperty().bind(userMenuButton.visibleProperty());
 
     try {
-      FXMLLoader fxmlLoaderTest = new FXMLLoader();
-      fxmlLoaderTest.setLocation(getClass().getResource("../fxml/home.fxml"));
-      homeBorderPane = fxmlLoaderTest.load();
+      FXMLLoader watchVideoLoader = new FXMLLoader();
+      watchVideoLoader.setLocation(getClass().getResource(
+        "../fxml/watch-video.fxml"
+      ));
+      watchVideoBorderPane = watchVideoLoader.load();
+      watchVideoController = watchVideoLoader.getController();
 
-      FXMLLoader fxmlLoaderLogin = new FXMLLoader();
-      fxmlLoaderLogin.setLocation(getClass().getResource("../fxml/log-in.fxml"));
-      loginBorderPane = fxmlLoaderLogin.load();
+      FXMLLoader uploadLoader = new FXMLLoader();
+      uploadLoader.setLocation(getClass().getResource(
+        "../fxml/upload-video.fxml"
+      ));
+      uploadBorderPane = uploadLoader.load();
 
+      FXMLLoader uploadProcessLoader = new FXMLLoader();
+      uploadProcessLoader.setLocation(getClass().getResource(
+        "../fxml/upload-process.fxml"
+      ));
+      uploadProcessBorderPane = uploadProcessLoader.load();
+      uploadProcessController = uploadProcessLoader.getController();
+
+      FXMLLoader homeLoader = new FXMLLoader();
+      homeLoader.setLocation(getClass().getResource(
+        "../fxml/home.fxml"
+      ));
+      homeBorderPane = homeLoader.load();
+      homeController = homeLoader.getController();
+
+      FXMLLoader loginLoader = new FXMLLoader();
+      loginLoader.setLocation(getClass().getResource(
+        "../fxml/log-in.fxml"
+      ));
+      loginBorderPane = loginLoader.load();
+
+
+      mainStackPane.getChildren().add(watchVideoBorderPane);
+      mainStackPane.getChildren().add(uploadBorderPane);
+      mainStackPane.getChildren().add(uploadProcessBorderPane);
       mainStackPane.getChildren().add(loginBorderPane);
       mainStackPane.getChildren().add(homeBorderPane);
 
       uploadButton.setVisible(false);
       userMenuButton.setVisible(false);
+
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -80,6 +111,9 @@ public class MainController implements Initializable {
       homeBorderPane.toFront();
     } else if (event.getSource() == searchButton) {
       requestSearch();
+    } else if (event.getSource() == uploadButton) {
+      System.out.println("true");
+      uploadBorderPane.toFront();
     }
   }
 

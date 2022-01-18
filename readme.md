@@ -2,12 +2,15 @@
 - Video sharing application using Java for UI & C for socket server.
 - Devoloped on Ubuntu 20.
 ## Tool Requirements
-- Install the default open JDK (ignore this if Java had been installed):
+- Install OpenJDK 17 (ignore this if Java had been installed):
+    ```
+    sudo add-apt-repository ppa:linuxuprising/java -y
+    ```
     ```
     sudo apt update
     ```
     ```
-    sudo apt install default-jdk
+    sudo apt-get install oracle-java17-installer oracle-java17-set-default
     ```
 - Download JavaFX runtime from gluonhq from: https://gluonhq.com/products/javafx/
     **Note**:
@@ -31,7 +34,11 @@
         ```
         bash idea.sh
         ```
-    - Select **Tools** -> **Create Desktop Entry...** to create icon in **Show all applications**:
+    - Select **Tools** -> **Create Desktop Entry...** to create icon in **Show all applications**
+- Install json C for server:
+  ```
+  sudo apt install libjson-c-dev
+  ```
 
 ## Set up IDE
 

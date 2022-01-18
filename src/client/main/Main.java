@@ -10,22 +10,25 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 public class Main extends Application {
-    public static MainController mainController;
+  public static MainController mainController;
+  public static Stage mainStage;
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/main.fxml"));
-        Parent root = loader.load();
-        mainController = loader.getController();
-        stage.setTitle("Youtok");
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
-    }
+  @Override
+  public void start(Stage stage) throws Exception {
+    mainStage = stage;
 
-    public static void main(String[] args) {
-         launch(args);
+    FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/main.fxml"));
+    Parent root = loader.load();
+    mainController = loader.getController();
+    stage.setTitle("Youtok");
+    Scene scene = new Scene(root);
+    stage.setScene(scene);
+    stage.show();
+  }
 
-    }
+  public static void main(String[] args) {
+    launch(args);
+
+  }
 
 }

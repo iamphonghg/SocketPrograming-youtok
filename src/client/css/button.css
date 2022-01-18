@@ -1,18 +1,16 @@
-.btn-login {
+.btn-login, .btn-select-file, .btn-start-upload {
     -fx-background-color: #f62b55;
     -fx-background-radius: 4;
     -fx-font-family: "Sofia Pro";
     -fx-font-weight: 700;
-
 }
 
-.btn-login:hover {
+.btn-login:hover, .btn-select-file:hover, .btn-start-upload:hover {
     -fx-font-size: 25px;
     -fx-background-color: #fe2c55;
-
 }
 
-.btn-login:focused {
+.btn-login:focused, .btn-select-file:focused, .btn-start-upload:focused {
     -fx-font-size: 25px;
 }
 

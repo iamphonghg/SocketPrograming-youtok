@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 
   char *server = "localhost";
   char *user = "root";
-  char *password = "";
+  char *password = "root";
   char *database = "youtok";
 
   conn = mysql_init(NULL);

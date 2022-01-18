@@ -1,15 +1,10 @@
 package client.main;
 
-import model.User;
-import netscape.javascript.JSObject;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.IOException;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class UDPBaseClient {
