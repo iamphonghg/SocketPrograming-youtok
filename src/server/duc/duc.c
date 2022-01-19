@@ -20,7 +20,7 @@ const char *update_privacy_respond(const char *video_id, const char *privacy);
 
 int main()
 {
-    printf("%s\n", update_privacy_respond("5","private"));
+    printf("%s\n", no_login_search_video("3 ngay"));
     return 0;
 }
 
@@ -58,24 +58,36 @@ const char *no_login_all_videos()
         while ((row = mysql_fetch_row(res)) != NULL)
         {
             char id[10];
+            char user_id[10];
             char title[255];
             char description[255];
             char privacy[30];
             char filename[255];
+            char content_type[10];
+            char byte_size[10];
+            char create_at[20];
 
             strcpy(id, row[0]);
+            strcpy(user_id, row[1]);
             strcpy(title, row[2]);
             strcpy(description, row[3]);
             strcpy(privacy, row[4]);
             strcpy(filename, row[5]);
+            strcpy(content_type, row[6]);
+            strcpy(byte_size, row[7]);
+            strcpy(create_at, row[8]);
 
             struct json_object *video = json_object_new_object();
 
             json_object_object_add(video, "id", json_object_new_string(id));
+            json_object_object_add(video, "user_id", json_object_new_string(user_id));
             json_object_object_add(video, "title", json_object_new_string(title));
             json_object_object_add(video, "description", json_object_new_string(description));
             json_object_object_add(video, "privacy", json_object_new_string(privacy));
             json_object_object_add(video, "filename", json_object_new_string(filename));
+            json_object_object_add(video, "content_type", json_object_new_string(content_type));
+            json_object_object_add(video, "byte_size", json_object_new_string(byte_size));
+            json_object_object_add(video, "create_at", json_object_new_string(create_at));
 
             json_object_array_add(videos_list, video);
         }
@@ -140,24 +152,36 @@ const char *login_all_videos(const char *user_id)
         while ((row = mysql_fetch_row(res)) != NULL)
         {
             char id[10];
+            char user_id[10];
             char title[255];
             char description[255];
             char privacy[30];
             char filename[255];
+            char content_type[10];
+            char byte_size[10];
+            char create_at[20];
 
             strcpy(id, row[0]);
+            strcpy(user_id, row[1]);
             strcpy(title, row[2]);
             strcpy(description, row[3]);
             strcpy(privacy, row[4]);
             strcpy(filename, row[5]);
+            strcpy(content_type, row[6]);
+            strcpy(byte_size, row[7]);
+            strcpy(create_at, row[8]);
 
             struct json_object *video = json_object_new_object();
 
             json_object_object_add(video, "id", json_object_new_string(id));
+            json_object_object_add(video, "user_id", json_object_new_string(user_id));
             json_object_object_add(video, "title", json_object_new_string(title));
             json_object_object_add(video, "description", json_object_new_string(description));
             json_object_object_add(video, "privacy", json_object_new_string(privacy));
             json_object_object_add(video, "filename", json_object_new_string(filename));
+            json_object_object_add(video, "content_type", json_object_new_string(content_type));
+            json_object_object_add(video, "byte_size", json_object_new_string(byte_size));
+            json_object_object_add(video, "create_at", json_object_new_string(create_at));
 
             json_object_array_add(videos_list, video);
         }
@@ -219,24 +243,36 @@ const char *current_user_all_videos(const char *user_id)
         while ((row = mysql_fetch_row(res)) != NULL)
         {
             char id[10];
+            char user_id[10];
             char title[255];
             char description[255];
             char privacy[30];
             char filename[255];
+            char content_type[10];
+            char byte_size[10];
+            char create_at[20];
 
             strcpy(id, row[0]);
+            strcpy(user_id, row[1]);
             strcpy(title, row[2]);
             strcpy(description, row[3]);
             strcpy(privacy, row[4]);
             strcpy(filename, row[5]);
+            strcpy(content_type, row[6]);
+            strcpy(byte_size, row[7]);
+            strcpy(create_at, row[8]);
 
             struct json_object *video = json_object_new_object();
 
             json_object_object_add(video, "id", json_object_new_string(id));
+            json_object_object_add(video, "user_id", json_object_new_string(user_id));
             json_object_object_add(video, "title", json_object_new_string(title));
             json_object_object_add(video, "description", json_object_new_string(description));
             json_object_object_add(video, "privacy", json_object_new_string(privacy));
             json_object_object_add(video, "filename", json_object_new_string(filename));
+            json_object_object_add(video, "content_type", json_object_new_string(content_type));
+            json_object_object_add(video, "byte_size", json_object_new_string(byte_size));
+            json_object_object_add(video, "create_at", json_object_new_string(create_at));
 
             json_object_array_add(videos_list, video);
         }
@@ -393,24 +429,36 @@ const char *no_login_search_video(const char *search_key)
         while ((row = mysql_fetch_row(res)) != NULL)
         {
             char id[10];
+            char user_id[10];
             char title[255];
             char description[255];
             char privacy[30];
             char filename[255];
+            char content_type[10];
+            char byte_size[10];
+            char create_at[20];
 
             strcpy(id, row[0]);
+            strcpy(user_id, row[1]);
             strcpy(title, row[2]);
             strcpy(description, row[3]);
             strcpy(privacy, row[4]);
             strcpy(filename, row[5]);
+            strcpy(content_type, row[6]);
+            strcpy(byte_size, row[7]);
+            strcpy(create_at, row[8]);
 
             struct json_object *video = json_object_new_object();
 
             json_object_object_add(video, "id", json_object_new_string(id));
+            json_object_object_add(video, "user_id", json_object_new_string(user_id));
             json_object_object_add(video, "title", json_object_new_string(title));
             json_object_object_add(video, "description", json_object_new_string(description));
             json_object_object_add(video, "privacy", json_object_new_string(privacy));
             json_object_object_add(video, "filename", json_object_new_string(filename));
+            json_object_object_add(video, "content_type", json_object_new_string(content_type));
+            json_object_object_add(video, "byte_size", json_object_new_string(byte_size));
+            json_object_object_add(video, "create_at", json_object_new_string(create_at));
 
             json_object_array_add(videos_list, video);
         }
