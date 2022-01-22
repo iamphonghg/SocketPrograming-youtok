@@ -164,7 +164,7 @@ const char *create_search_video_no_login_response(const char *search_key)
   conn = mysql_init(NULL);
 
   char query_string[255];
-  strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.title like \"%");
+  strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.privacy = \"public\" and youtok.videos.title like \"%");
   strcat(query_string, search_key);
   strcat(query_string, "%\";");
   printf("%s\n", query_string);
@@ -323,6 +323,7 @@ const char *create_upload_new_video_response(
 
   conn = mysql_init(NULL);
 
+  srand(time(NULL));
   char query_string[1024];
 
   strcpy(query_string, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (");
