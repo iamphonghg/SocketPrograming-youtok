@@ -29,6 +29,7 @@ public class VideoButton extends Button {
   private String videoTitle;
   private VBox buttonLayoutVBox;
   private String videoFileName;
+  private Integer currentStreamThreadNo;
   public VideoButton(String videoTitle, String authorName, String videoFileName) {
     this.videoFileName = videoFileName;
     this.setMinHeight(280);
@@ -98,6 +99,11 @@ public class VideoButton extends Button {
           @Override
           public void handle(ActionEvent actionEvent) {
             stage.close();
+            try {
+              requestCancelStreamVideo();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
           }
         });
       }
@@ -111,12 +117,33 @@ public class VideoButton extends Button {
       e.printStackTrace();
     }
     ProcessBuilder processBuilder = new ProcessBuilder();
-    processBuilder.command("bash", "-c", "ffplay rtsp://127.0.0.1:8554/" + this.videoFileName);
+    processBuilder.command("bash", "-c", "ffplay rtsp://" + Main.SERVER_IP + ":8554/" + this.videoFileName);
     try {
       Process process = processBuilder.start();
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private void requestCancelStreamVideo() throws IOException {
+    Socket socket = new Socket(Main.SERVER_IP, 1472);
+    DataOutputStream dataOutputStream = new DataOutputStream(
+      socket.getOutputStream()
+    );
+
+    byte[] bufferSend = null;
+    byte[] bufferReceive = new byte[4096];
+
+    JSONObject request = new JSONObject();
+    request.put("head", "cancel_stream");
+
+    JSONObject requestBody = new JSONObject();
+    requestBody.put("thread_no", this.currentStreamThreadNo);
+    request.put("body", requestBody);
+    bufferSend = request.toJSONString().getBytes();
+
+    dataOutputStream.write(bufferSend);
+    dataOutputStream.flush();
   }
 
   private void requestWatchVideo() throws IOException {
@@ -154,7 +181,9 @@ public class VideoButton extends Button {
 
     JSONObject jsonObjectBody = (JSONObject) JSONValue.parse(responseBody);
     String linkToVideoStream = jsonObjectBody.get("filename").toString();
+    this.setCurrentStreamThreadNo(Integer.valueOf(jsonObjectBody.get("thread_no").toString()));
     System.out.println(linkToVideoStream);
+    System.out.println(this.currentStreamThreadNo);
   }
 
   public String getVideoTitle() {
@@ -166,6 +195,14 @@ public class VideoButton extends Button {
 
   public String getVideoFileName() {
     return videoFileName;
+  }
+
+  public Integer getCurrentStreamThreadNo() {
+    return currentStreamThreadNo;
+  }
+
+  public void setCurrentStreamThreadNo(Integer currentStreamThreadNo) {
+    this.currentStreamThreadNo = currentStreamThreadNo;
   }
 
   public void setVideoFileName(String videoFileName) {

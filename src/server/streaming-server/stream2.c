@@ -116,6 +116,6 @@ int start_stream(const char *filename)
   }
 }
 
-// int main() {
-//   start_stream("Lamchulaptrinhmang.mp4");
-// }
+int main(int argc, char *argv[]) {
+  start_stream(argv[1]);
+}

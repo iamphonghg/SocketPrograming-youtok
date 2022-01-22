@@ -24,13 +24,12 @@ const char *database = "youtok";
 
 const char *get_request_head(const char *request);
 const char *create_login_response(const char *request);
-const char *create_watch_video_response(const char *request);
+const char *create_watch_video_response(const char *request, int streamThreadNo);
 const char *get_request_body(const char *request);
 const char *get_user_json_string(const char *username, const char *user_password);
 const char *get_filename_string(const char *body);
 const char *create_fetch_all_videos_response();
-
-guint exit_timeout_id = 0;
+int get_running_thread_no_to_kill(const char *request);
 
 static gboolean
 timeout(GstRTSPServer *server)
@@ -44,58 +43,11 @@ timeout(GstRTSPServer *server)
   return TRUE;
 }
 
-static GstRTSPFilterResult
-client_filter(GstRTSPServer *server, GstRTSPClient *client,
-              gpointer user_data)
+void *start_stream(void *filenameInput)
 {
-  /* Simple filter that shuts down all clients. */
-  return GST_RTSP_FILTER_REMOVE;
-}
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  char *filename = (char *) filenameInput;
 
-/* Timeout that runs 10 seconds after the first client connects and triggers
- * the shutdown of the server */
-static gboolean
-shutdown_timeout(GstRTSPServer *server)
-{
-  GstRTSPMountPoints *mounts;
-  g_print("Time for everyone to go. Removing mount point\n");
-  /* Remove the mount point to prevent new clients connecting */
-  mounts = gst_rtsp_server_get_mount_points(server);
-  gst_rtsp_mount_points_remove_factory(mounts, "/test");
-  g_object_unref(mounts);
-
-  /* Filter existing clients and remove them */
-  g_print("Disconnecting existing clients\n");
-  gst_rtsp_server_client_filter(server, client_filter, NULL);
-  return FALSE;
-}
-
-static void
-client_connected(GstRTSPServer *server, GstRTSPClient *client)
-{
-  if (exit_timeout_id == 0)
-  {
-    g_print("First Client connected. Disconnecting everyone in 10 seconds\n");
-    exit_timeout_id =
-        g_timeout_add_seconds(10, (GSourceFunc)shutdown_timeout, server);
-  }
-}
-
-static gboolean
-remove_sessions(GstRTSPServer *server)
-{
-  GstRTSPSessionPool *pool;
-
-  pool = gst_rtsp_server_get_session_pool(server);
-  guint removed = gst_rtsp_session_pool_cleanup(pool);
-  g_object_unref(pool);
-  g_print("Removed %d sessions\n", removed);
-
-  return TRUE;
-}
-
-int start_stream(const char *filename)
-{
   GMainLoop *loop;
   GstRTSPServer *server;
   GstRTSPMountPoints *mounts;
@@ -127,25 +79,54 @@ int start_stream(const char *filename)
   if (gst_rtsp_server_attach(server, NULL) == 0)
     goto failed;
 
-  // g_signal_connect(server, "client-connected", (GCallback)client_connected, NULL);
 
-  /* add a timeout for the session cleanup */
   g_timeout_add_seconds(2, (GSourceFunc)timeout, server);
   g_print("stream ready at rtsp://127.0.0.1:8554%s\n", mountPointStr);
   g_main_loop_run(loop);
 
-  return 0;
-
-/* ERRORS */
-failed:
-{
-  g_print("failed to attach the server\n");
-  return -1;
-}
+  /* ERRORS */
+  failed:
+  {
+    g_print("failed to attach the server\n");
+  }
 }
 
 void *connection_handler(void *client_socket) {
   int connfd = *(int *)client_socket;
+}
+
+void receive_image(int sockfd, char *imageFileName)
+{
+  FILE *newFile = fopen(imageFileName, "wb");
+
+  ssize_t n;
+  char buff[MAX_BUFFER] = {0};
+  while ((n = recv(sockfd, buff, MAX_BUFFER, 0)) > 0)
+  {
+    if (n == -1)
+    {
+      printf("Receive image failed!\n");
+      exit(1);
+    }
+
+    if (fwrite(buff, sizeof(char), n, newFile) != n)
+    {
+      printf("Write file failed!\n");
+      exit(1);
+    }
+    bzero(&buff, sizeof(buff));
+  }
+  fclose(newFile);
+}
+
+void *handle_upload_new_video(void *client_socket) {
+  int sockfd = *(int *) client_socket;
+
+
+}
+
+void *handle_request(void *client_socket) {
+  int connfd = *(int *) client_socket;
 
   char buffer[MAX_BUFFER];
 
@@ -156,6 +137,7 @@ void *connection_handler(void *client_socket) {
   const char *request_head = get_request_head(buffer);
   const char *request_body = get_request_body(buffer);
   const char *response = NULL;
+
   if (strcmp(request_head, "login") == 0)
   {
     response = create_login_response(request_body);
@@ -168,13 +150,38 @@ void *connection_handler(void *client_socket) {
   }
   else if (strcmp(request_head, "watch_video") == 0)
   {
-    response = create_watch_video_response(request_body);
-    write(connfd, response, strlen(response));
-    start_stream(get_filename_string(request_body));
-  }
-  printf("%ld\n", strlen(response));
+    // response = create_watch_video_response(request_body, no_threads);
+    // write(connfd, response, strlen(response));
+    // char filename[100];
+    // strcpy(filename, get_filename_string(request_body));
+    // if (pthread_create(&threads[no_threads], NULL, start_stream, filename) < 0)
+    // {
+    //   perror("Could not create thread");
+    //   return 1;
+    // }
 
-  printf("Response: %s\n", response);
+  }
+  else if (strcmp(request_head, "cancel_stream") == 0)
+  {
+    // printf("%s\n", request_body);
+    // int thread_no_to_kill = get_running_thread_no_to_kill(request_body);
+    // pthread_cancel(threads[thread_no_to_kill]);
+    // pthread_join(threads[thread_no_to_kill], NULL);
+  }
+  else if (strcmp(request_head, "upload_new_video") == 0)
+  {
+    // if (pthread_create(&threads[no_threads], NULL, handle_upload_new_video, connfd) < 0)
+    // {
+    //   perror("Could not create thread");
+    //   return 1;
+    // }
+  }
+
+  if (response != NULL)
+  {
+    printf("%ld\n", strlen(response));
+    printf("Response: %s\n", response);
+  }
 }
 
 int main(int argc, char *argv[])
@@ -219,7 +226,7 @@ int main(int argc, char *argv[])
     len = sizeof(cliaddr);
 
     connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &len);
-    if (pthread_create(&threads[no_threads], NULL, connection_handler, &connfd) < 0)
+    if (pthread_create(&threads[no_threads], NULL, handle_request, &connfd) < 0)
     {
       perror("Could not create thread");
       return 1;
@@ -231,9 +238,11 @@ int main(int argc, char *argv[])
     }
     else
       printf("server accept the client...\n");
+
     puts("Handler assigned");
     no_threads++;
   }
+
   int k = 0;
   for (k = 0; k < 50; k++)
   {
@@ -243,6 +252,15 @@ int main(int argc, char *argv[])
   return 0;
 }
 
+int get_running_thread_no_to_kill(const char *request) {
+  struct json_object *parsed_body_json;
+  struct json_object *thread_no;
+
+  parsed_body_json = json_tokener_parse(request);
+
+  json_object_object_get_ex(parsed_body_json, "thread_no", &thread_no);
+  return json_object_get_int(thread_no);
+}
 
 const char *get_request_head(const char *request)
 {
@@ -281,7 +299,7 @@ const char *get_filename_string(const char *body)
   return json_object_get_string(filename);
 }
 
-const char *create_watch_video_response(const char *body)
+const char *create_watch_video_response(const char *body, int streamThreadNo)
 {
   struct json_object *parsed_body_json;
   struct json_object *filename;
@@ -295,6 +313,7 @@ const char *create_watch_video_response(const char *body)
 
   struct json_object *response_body_json = json_object_new_object();
   json_object_object_add(response_body_json, "filename", filename);
+  json_object_object_add(response_body_json, "thread_no", json_object_new_int64(streamThreadNo));
   json_object_object_add(response_json, "body", response_body_json);
   printf("%s\n", json_object_to_json_string(response_json));
   return json_object_to_json_string(response_json);
