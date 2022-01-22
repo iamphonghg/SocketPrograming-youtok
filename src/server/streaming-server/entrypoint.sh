@@ -1,8 +1,13 @@
 # compile code
 gcc -o stream stream.c `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gstreamer-1.0`
+# compile code
+gcc -o stream2 stream2.c `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gstreamer-1.0`
+
+gcc -o stream3 stream3.c `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gstreamer-1.0`
 
 # execute code
-./stream "( filesrc location=\test.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 config-interval=1 ssrc=10000000 )"
+./stream "( filesrc location=\test.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 )"
+./stream2 "( filesrc location=\test.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 )"
 
 ffmpeg -fflags nobuffer \
  -rtsp_transport tcp \

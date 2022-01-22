@@ -17,13 +17,20 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 public class VideoButton extends Button {
   private String videoTitle;
   private VBox buttonLayoutVBox;
-  public VideoButton(String videoTitle, String authorName) {
+  private String videoFileName;
+  public VideoButton(String videoTitle, String authorName, String videoFileName) {
+    this.videoFileName = videoFileName;
     this.setMinHeight(280);
     this.setMaxWidth(Double.MAX_VALUE);
     this.setCursor(Cursor.HAND);
@@ -83,13 +90,7 @@ public class VideoButton extends Button {
         watchButton.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent actionEvent) {
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.command("bash", "-c", "ffplay rtsp://127.0.0.1:8554/test");
-            try {
-              Process process = processBuilder.start();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
+            handleWatchVideo();
           }
         });
 
@@ -103,10 +104,71 @@ public class VideoButton extends Button {
     });
   }
 
+  private void handleWatchVideo() {
+    try {
+      requestWatchVideo();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    ProcessBuilder processBuilder = new ProcessBuilder();
+    processBuilder.command("bash", "-c", "ffplay rtsp://127.0.0.1:8554/" + this.videoFileName);
+    try {
+      Process process = processBuilder.start();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void requestWatchVideo() throws IOException {
+    Socket socket = new Socket(Main.SERVER_IP, 1472);
+    DataOutputStream dataOutputStream = new DataOutputStream(
+      socket.getOutputStream()
+    );
+
+    byte[] bufferSend = null;
+    byte[] bufferReceive = new byte[4096];
+
+    JSONObject request = new JSONObject();
+    request.put("head", "watch_video");
+
+    JSONObject requestBody = new JSONObject();
+    requestBody.put("filename", this.videoFileName);
+    request.put("body", requestBody);
+    bufferSend = request.toJSONString().getBytes();
+
+    dataOutputStream.write(bufferSend);
+    dataOutputStream.flush();
+
+    DataInputStream dataInputStream = new DataInputStream(
+      socket.getInputStream()
+    );
+
+    String response = new String(
+      bufferReceive,
+      0,
+      dataInputStream.read(bufferReceive)
+    );
+
+    JSONObject jsonObject = (JSONObject) JSONValue.parse(response);
+    String responseBody = jsonObject.get("body").toString();
+
+    JSONObject jsonObjectBody = (JSONObject) JSONValue.parse(responseBody);
+    String linkToVideoStream = jsonObjectBody.get("filename").toString();
+    System.out.println(linkToVideoStream);
+  }
+
   public String getVideoTitle() {
     return videoTitle;
   }
   public void setVideoTitle(String videoTitle) {
     this.videoTitle = videoTitle;
+  }
+
+  public String getVideoFileName() {
+    return videoFileName;
+  }
+
+  public void setVideoFileName(String videoFileName) {
+    this.videoFileName = videoFileName;
   }
 }

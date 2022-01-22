@@ -1,21 +1,21 @@
--- fetch video khi khởi động ứng dụng:
+1 fetch video khi khởi động ứng dụng:
 + input: none
 + output: tất cả video, ngoại trừ private
--- fetch video sau khi đăng nhập
+2 fetch video sau khi đăng nhập
 + input: user_id
 + output: tất cả video, ngoại trừ private của user khác, bao gồm private video của current user
--- khi ấn xem video trên homepage, kiểm tra xem người dùng hiện tại có quyền xem video đó không (trong trường hợp chủ video vừa thay đổi quyền truy cập nhưng trên homepage của người dùng khác vẫn đang hiển thị video đó):
+3 khi ấn xem video trên homepage, kiểm tra xem người dùng hiện tại có quyền xem video đó không (trong trường hợp chủ video vừa thay đổi quyền truy cập nhưng trên homepage của người dùng khác vẫn đang hiển thị video đó):
 + input: user_id, video_id
 + output: boolean
--- thay đổi quyền truy cập của video:
+4 thay đổi quyền truy cập của video:
 + input: video_id, privacy
 + output: boolean
--- fetch video của current user:
+5 fetch video của current user:
 + input: user_id
 + output: tất cả video
 
 
 Nghiên:
--- tìm kiếm video, 2 trường hợp, có hoặc không đăng nhập
+6 tìm kiếm video, 2 trường hợp, có hoặc không đăng nhập
 input: có đăng nhập thì có user_id, search_string
 output: list video tìm được có title chứa search_string (kiểm tra privacy)

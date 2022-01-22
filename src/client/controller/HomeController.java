@@ -78,9 +78,10 @@ public class HomeController implements Initializable {
     for (Video video : videos) {
       VideoButton videoButton = new VideoButton(
         video.getTitle(),
-        "Author "
+        "Author ",
+        video.getFilename()
       );
-      System.out.println(video.getTitle().length());
+      System.out.println(video.getFilename());
       buttonList.add(videoButton);
     }
     int COLS = 4;
@@ -101,7 +102,7 @@ public class HomeController implements Initializable {
   }
 
   public List<Video> fetchAllVideos() throws IOException {
-    Socket socket = new Socket("127.0.0.1", 1472);
+    Socket socket = new Socket(Main.SERVER_IP, 1472);
     DataOutputStream dataOutputStream = new DataOutputStream(
       socket.getOutputStream()
     );

@@ -12,7 +12,7 @@ import org.json.simple.JSONValue;
 public class Main extends Application {
   public static MainController mainController;
   public static Stage mainStage;
-
+  public static final String SERVER_IP = "127.0.0.1";
   @Override
   public void start(Stage stage) throws Exception {
     mainStage = stage;

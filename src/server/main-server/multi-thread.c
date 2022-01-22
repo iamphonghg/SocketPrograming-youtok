@@ -12,6 +12,7 @@
 #include <mysql/mysql.h>
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
+#include <pthread.h>
 
 #define PORT 1472
 #define MAX_BUFFER 4096
@@ -135,19 +136,51 @@ int start_stream(const char *filename)
 
   return 0;
 
-  /* ERRORS */
-  failed:
+/* ERRORS */
+failed:
+{
+  g_print("failed to attach the server\n");
+  return -1;
+}
+}
+
+void *connection_handler(void *client_socket) {
+  int connfd = *(int *)client_socket;
+
+  char buffer[MAX_BUFFER];
+
+  bzero(buffer, MAX_BUFFER);
+  read(connfd, buffer, sizeof(buffer));
+
+  printf("Client: %s\n", buffer);
+  const char *request_head = get_request_head(buffer);
+  const char *request_body = get_request_body(buffer);
+  const char *response = NULL;
+  if (strcmp(request_head, "login") == 0)
   {
-    g_print("failed to attach the server\n");
-    return -1;
+    response = create_login_response(request_body);
+    write(connfd, response, strlen(response));
   }
+  else if (strcmp(request_head, "fetch_all_videos") == 0)
+  {
+    response = create_fetch_all_videos_response();
+    write(connfd, response, strlen(response));
+  }
+  else if (strcmp(request_head, "watch_video") == 0)
+  {
+    response = create_watch_video_response(request_body);
+    write(connfd, response, strlen(response));
+    start_stream(get_filename_string(request_body));
+  }
+  printf("%ld\n", strlen(response));
+
+  printf("Response: %s\n", response);
 }
 
 int main(int argc, char *argv[])
 {
   int sockfd, connfd;
   struct sockaddr_in servaddr, cliaddr;
-  char buffer[MAX_BUFFER];
 
   if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
   {
@@ -171,9 +204,12 @@ int main(int argc, char *argv[])
 
   len = sizeof(cliaddr);
 
+  int no_threads = 0;
+  pthread_t threads[50];
+
   for (;;)
   {
-    if ((listen(sockfd, 5)) != 0)
+    if ((listen(sockfd, 50)) != 0)
     {
       printf("Listen failed...\n");
       exit(0);
@@ -183,6 +219,11 @@ int main(int argc, char *argv[])
     len = sizeof(cliaddr);
 
     connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &len);
+    if (pthread_create(&threads[no_threads], NULL, connection_handler, &connfd) < 0)
+    {
+      perror("Could not create thread");
+      return 1;
+    }
     if (connfd < 0)
     {
       printf("server accept failed...\n");
@@ -190,36 +231,18 @@ int main(int argc, char *argv[])
     }
     else
       printf("server accept the client...\n");
-
-    bzero(buffer, MAX_BUFFER);
-    read(connfd, buffer, sizeof(buffer));
-
-    printf("Client: %s\n", buffer);
-    const char *request_head = get_request_head(buffer);
-    const char *request_body = get_request_body(buffer);
-    const char *response = NULL;
-    if (strcmp(request_head, "login") == 0)
-    {
-      response = create_login_response(request_body);
-      write(connfd, response, strlen(response));
-    }
-    else if (strcmp(request_head, "fetch_all_videos") == 0)
-    {
-      response = create_fetch_all_videos_response();
-      write(connfd, response, strlen(response));
-    }
-    else if (strcmp(request_head, "watch_video") == 0) {
-      response = create_watch_video_response(request_body);
-      write(connfd, response, strlen(response));
-      start_stream(get_filename_string(request_body));
-    }
-    printf("%ld\n", strlen(response));
-
-    printf("Response: %s\n", response);
+    puts("Handler assigned");
+    no_threads++;
   }
-
+  int k = 0;
+  for (k = 0; k < 50; k++)
+  {
+    pthread_join(threads[k], NULL);
+  }
+  close(sockfd);
   return 0;
 }
+
 
 const char *get_request_head(const char *request)
 {
@@ -245,26 +268,27 @@ const char *get_request_body(const char *request)
   return json_object_get_string(body);
 }
 
-const char *get_filename_string(const char *body) {
+const char *get_filename_string(const char *body)
+{
   struct json_object *parsed_body_json;
   struct json_object *filename;
 
   parsed_body_json = json_tokener_parse(body);
 
   json_object_object_get_ex(parsed_body_json, "filename", &filename);
-  printf("%s\n",json_object_to_json_string(filename));
+  printf("%s\n", json_object_to_json_string(filename));
 
   return json_object_get_string(filename);
 }
 
-const char *create_watch_video_response(const char *body) {
+const char *create_watch_video_response(const char *body)
+{
   struct json_object *parsed_body_json;
   struct json_object *filename;
 
   parsed_body_json = json_tokener_parse(body);
 
   json_object_object_get_ex(parsed_body_json, "filename", &filename);
-
 
   struct json_object *response_json = json_object_new_object();
   json_object_object_add(response_json, "head", json_object_new_string("watch_video_response"));
