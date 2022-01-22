@@ -122,6 +122,20 @@ void *handle_request(void *client_socket)
   }
 }
 
+const char *rand_text(const char *file) {
+    char *result;
+    result = (char*)malloc(sizeof(char*)*11 + strlen(file));
+    int i, rand_int;
+    char char_set[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&quot";
+
+    for (i = 0; i <9; i++) {
+        result[i] = char_set[rand() % sizeof(char_set)];
+    }
+    result[9] = '-';
+    strcat(result,file);
+    return result;
+}
+
 void receive_image(int connfd, const char *filename)
 {
   char path[100];
@@ -170,14 +184,16 @@ void handle_upload_new_video(int connfd, const char *request_body)
   json_object_object_get_ex(parsed_body_json, "filename", &filename);
   json_object_object_get_ex(parsed_body_json, "byte_size", &byte_size);
 
-  receive_image(connfd, json_object_get_string(filename));
+  srand(time(NULL));
+  const char *file_name = rand_text(json_object_get_string(filename));
+  receive_image(connfd, file_name);
 
   const char *response = create_upload_new_video_response(
     json_object_get_string(user_id),
     json_object_get_string(title),
     json_object_get_string(description),
     json_object_get_string(privacy),
-    json_object_get_string(filename),
+    file_name,
     json_object_get_string(byte_size)
   );
   printf("%s\n", response);

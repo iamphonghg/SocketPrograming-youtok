@@ -13,6 +13,7 @@
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
 #include <pthread.h>
+#include <time.h>
 
 #define PORT 1472
 #define MAX_BUFFER 4096
@@ -28,7 +29,6 @@ const char *create_watch_video_response(const char *request, int streamThreadNo)
 const char *get_request_body(const char *request);
 const char *get_user_json_string(const char *username, const char *user_password);
 const char *get_filename_string(const char *body);
-
 const char *create_fetch_all_videos_no_login_response();
 
 const char *get_current_user_id(const char *request_body);
@@ -36,6 +36,7 @@ const char *create_fetch_all_videos_has_login_response(const char *user_id);
 
 int get_running_thread_no_to_kill(const char *request);
 
+const char *rand_text(const char *file);
 void handle_upload_new_video(int connfd, const char *request_body);
 void receive_image(int sockfd, const char *filename);
 const char *create_upload_new_video_response(

@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <json-c/json.h>
 #include <mysql/mysql.h>
+#include <time.h>
 
 const char *server = "localhost";
 const char *user = "root";
@@ -18,12 +19,25 @@ int check_permission_to_watch_video(const char *user_id, const char *video_id);
 const char *no_login_search_video(const char *search_key);
 const char *update_privacy_respond(const char *video_id, const char *privacy);
 const char *insert_video_upload(const char *body);
-
+const char* rand_text(const char *file);
 int main()
 {
     char *body = "{ 'user_id': '1', 'title': 'Thuat toan khong kho 1', 'description': 'Pham Tuan Duc', 'privacy': 'public', 'filename': 'thuattoankhongkho.mp4', 'content_type': 'mp4', 'byte_size': '4096' }";
-    printf("%s\n", no_login_all_videos());
+    printf("%s\n", no_login_search_video("daycon"));
     return 0;
+}
+const char* rand_text(const char *file) {
+    char *result;
+    result = (char*)malloc(sizeof(char*)*11 + strlen(file));
+    int i, rand_int;
+    char char_set[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&quot";
+
+    for (i = 0; i <9; i++) {
+        result[i] = char_set[rand() % sizeof(char_set)];
+    }
+    result[9] = '-';
+    strcat(result,file);
+    return result;
 }
 
 const char *insert_video_upload(const char *body)
@@ -47,6 +61,8 @@ const char *insert_video_upload(const char *body)
     json_object_object_get_ex(parsed_body_json, "filename", &filename);
     json_object_object_get_ex(parsed_body_json, "byte_size", &byte_size);
 
+    srand(time(NULL));
+    const char *file = rand_text(json_object_get_string(filename));
     char query_string[1024];
 
     strcpy(query_string, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (");
@@ -58,7 +74,7 @@ const char *insert_video_upload(const char *body)
     strcat(query_string, "','");
     strcat(query_string, json_object_get_string(privacy));
     strcat(query_string, "','");
-    strcat(query_string, json_object_get_string(filename));
+    strcat(query_string, file);
     strcat(query_string, "','");
     strcat(query_string, "mp4");
     strcat(query_string, "',");
@@ -471,7 +487,7 @@ const char *no_login_search_video(const char *search_key)
     conn = mysql_init(NULL);
 
     char query_string[255];
-    strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.title like \"%");
+    strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.privacy = \"public\" and youtok.videos.title like \"%");
     strcat(query_string, search_key);
     strcat(query_string, "%\";");
     printf("%s\n", query_string);
