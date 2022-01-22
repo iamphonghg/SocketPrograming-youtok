@@ -17,11 +17,75 @@ const char *current_user_all_videos(const char *user_id);
 int check_permission_to_watch_video(const char *user_id, const char *video_id);
 const char *no_login_search_video(const char *search_key);
 const char *update_privacy_respond(const char *video_id, const char *privacy);
+const char *insert_video_upload(const char *body);
 
 int main()
 {
-    printf("%s\n", no_login_search_video("3 ngay"));
+    char *body = "{ 'user_id': '1', 'title': 'Thuat toan khong kho 1', 'description': 'Pham Tuan Duc', 'privacy': 'public', 'filename': 'thuattoankhongkho.mp4', 'content_type': 'mp4', 'byte_size': '4096' }";
+    printf("%s\n", insert_video_upload(body));
     return 0;
+}
+
+const char *insert_video_upload(const char *body)
+{
+    MYSQL *conn;
+    MYSQL_RES *res;
+
+    struct json_object *response_json = json_object_new_object();
+    json_object_object_add(response_json, "head", json_object_new_string("insert_response"));
+    struct json_object *response_json_body = json_object_new_object();
+    conn = mysql_init(NULL);
+
+    struct json_object *parsed_body_json;
+    struct json_object *user_id, *title, *description, *privacy, *filename, *content_type, *byte_size;
+
+    parsed_body_json = json_tokener_parse(body);
+    json_object_object_get_ex(parsed_body_json, "user_id", &user_id);
+    json_object_object_get_ex(parsed_body_json, "title", &title);
+    json_object_object_get_ex(parsed_body_json, "description", &description);
+    json_object_object_get_ex(parsed_body_json, "privacy", &privacy);
+    json_object_object_get_ex(parsed_body_json, "filename", &filename);
+    json_object_object_get_ex(parsed_body_json, "content_type", &content_type);
+    json_object_object_get_ex(parsed_body_json, "byte_size", &byte_size);
+
+    char query_string[1024];
+
+    strcpy(query_string, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (");
+    strcat(query_string, json_object_get_string(user_id));
+    strcat(query_string, ",'");
+    strcat(query_string, json_object_get_string(title));
+    strcat(query_string, "','");
+    strcat(query_string, json_object_get_string(description));
+    strcat(query_string, "','");
+    strcat(query_string, json_object_get_string(privacy));
+    strcat(query_string, "','");
+    strcat(query_string, json_object_get_string(filename));
+    strcat(query_string, "','");
+    strcat(query_string, json_object_get_string(content_type));
+    strcat(query_string, "',");
+    strcat(query_string, json_object_get_string(byte_size));
+    strcat(query_string, ");");
+    printf("%s\n",query_string);
+    
+    if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0))
+    {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        exit(1);
+    }
+
+    if (mysql_query(conn, query_string))
+    {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        json_object_object_add(response_json_body, "status", json_object_new_string("false"));
+        json_object_object_add(response_json, "body", response_json_body);
+        mysql_close(conn);
+        return json_object_to_json_string(response_json);
+    }
+
+    json_object_object_add(response_json_body, "status", json_object_new_string("true"));
+    json_object_object_add(response_json, "body", response_json_body);
+    mysql_close(conn);
+    return json_object_to_json_string(response_json);
 }
 
 const char *no_login_all_videos()
@@ -379,14 +443,14 @@ const char *update_privacy_respond(const char *video_id, const char *privacy)
     if (mysql_query(conn, query_string))
     {
         fprintf(stderr, "%s\n", mysql_error(conn));
-        json_object_object_add(response_json_body,"status",json_object_new_string("false"));
-        json_object_object_add(response_json,"body",response_json_body);
+        json_object_object_add(response_json_body, "status", json_object_new_string("false"));
+        json_object_object_add(response_json, "body", response_json_body);
         mysql_close(conn);
         return json_object_to_json_string(response_json);
     }
 
-    json_object_object_add(response_json_body,"status",json_object_new_string("true"));
-    json_object_object_add(response_json,"body",response_json_body);
+    json_object_object_add(response_json_body, "status", json_object_new_string("true"));
+    json_object_object_add(response_json, "body", response_json_body);
     mysql_close(conn);
     return json_object_to_json_string(response_json);
 }
