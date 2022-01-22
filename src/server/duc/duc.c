@@ -22,7 +22,7 @@ const char *insert_video_upload(const char *body);
 int main()
 {
     char *body = "{ 'user_id': '1', 'title': 'Thuat toan khong kho 1', 'description': 'Pham Tuan Duc', 'privacy': 'public', 'filename': 'thuattoankhongkho.mp4', 'content_type': 'mp4', 'byte_size': '4096' }";
-    printf("%s\n", insert_video_upload(body));
+    printf("%s\n", no_login_all_videos());
     return 0;
 }
 
@@ -98,7 +98,7 @@ const char *no_login_all_videos()
 
     conn = mysql_init(NULL);
 
-    char *query_string = "select * from youtok.videos where youtok.videos.privacy = \"public\";";
+    char *query_string = "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.privacy = \"public\";";
 
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0))
     {
@@ -130,6 +130,7 @@ const char *no_login_all_videos()
             char content_type[10];
             char byte_size[10];
             char create_at[20];
+            char full_name[50];
 
             strcpy(id, row[0]);
             strcpy(user_id, row[1]);
@@ -140,11 +141,13 @@ const char *no_login_all_videos()
             strcpy(content_type, row[6]);
             strcpy(byte_size, row[7]);
             strcpy(create_at, row[8]);
+            strcpy(full_name, row[9]);
 
             struct json_object *video = json_object_new_object();
 
             json_object_object_add(video, "id", json_object_new_string(id));
             json_object_object_add(video, "user_id", json_object_new_string(user_id));
+            json_object_object_add(video, "author", json_object_new_string(full_name));
             json_object_object_add(video, "title", json_object_new_string(title));
             json_object_object_add(video, "description", json_object_new_string(description));
             json_object_object_add(video, "privacy", json_object_new_string(privacy));
@@ -187,8 +190,8 @@ const char *login_all_videos(const char *user_id)
     conn = mysql_init(NULL);
 
     char query_string[255];
-    strcpy(query_string, "select * from youtok.videos where youtok.videos.privacy = \"public\" ");
-    strcat(query_string, "union select * from youtok.videos where youtok.videos.user_id = ");
+    strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and  youtok.videos.privacy = \"public\" ");
+    strcat(query_string, "union select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.user_id = ");
     strcat(query_string, user_id);
     strcat(query_string, ";");
 
@@ -224,6 +227,7 @@ const char *login_all_videos(const char *user_id)
             char content_type[10];
             char byte_size[10];
             char create_at[20];
+            char full_name[50];
 
             strcpy(id, row[0]);
             strcpy(user_id, row[1]);
@@ -234,11 +238,13 @@ const char *login_all_videos(const char *user_id)
             strcpy(content_type, row[6]);
             strcpy(byte_size, row[7]);
             strcpy(create_at, row[8]);
+            strcpy(full_name, row[9]);
 
             struct json_object *video = json_object_new_object();
 
             json_object_object_add(video, "id", json_object_new_string(id));
             json_object_object_add(video, "user_id", json_object_new_string(user_id));
+            json_object_object_add(video, "author", json_object_new_string(full_name));
             json_object_object_add(video, "title", json_object_new_string(title));
             json_object_object_add(video, "description", json_object_new_string(description));
             json_object_object_add(video, "privacy", json_object_new_string(privacy));
@@ -466,7 +472,7 @@ const char *no_login_search_video(const char *search_key)
     conn = mysql_init(NULL);
 
     char query_string[255];
-    strcpy(query_string, "select * from youtok.videos where youtok.videos.title like \"%");
+    strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.title like \"%");
     strcat(query_string, search_key);
     strcat(query_string, "%\";");
     printf("%s\n", query_string);
@@ -501,6 +507,7 @@ const char *no_login_search_video(const char *search_key)
             char content_type[10];
             char byte_size[10];
             char create_at[20];
+            char full_name[50];
 
             strcpy(id, row[0]);
             strcpy(user_id, row[1]);
@@ -511,11 +518,13 @@ const char *no_login_search_video(const char *search_key)
             strcpy(content_type, row[6]);
             strcpy(byte_size, row[7]);
             strcpy(create_at, row[8]);
+            strcpy(full_name, row[9]);
 
             struct json_object *video = json_object_new_object();
 
             json_object_object_add(video, "id", json_object_new_string(id));
             json_object_object_add(video, "user_id", json_object_new_string(user_id));
+            json_object_object_add(video, "author", json_object_new_string(full_name));
             json_object_object_add(video, "title", json_object_new_string(title));
             json_object_object_add(video, "description", json_object_new_string(description));
             json_object_object_add(video, "privacy", json_object_new_string(privacy));
