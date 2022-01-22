@@ -95,6 +95,11 @@ void *handle_request(void *client_socket)
   {
     handle_upload_new_video(connfd, request_body);
   }
+  else if (strcmp(request_head, "search_video_no_login") == 0) {
+    const char *search_key = get_search_key(request_body);
+    response = create_search_video_no_login_response(search_key);
+    write(connfd, response, strlen(response));
+  }
   else if (strcmp(request_head, "watch_video") == 0)
   {
     // response = create_watch_video_response(request_body, no_threads);
@@ -134,6 +139,108 @@ const char *rand_text(const char *file) {
     result[9] = '-';
     strcat(result,file);
     return result;
+}
+
+const char *get_search_key(const char *request_body) {
+  struct json_object *parsed_body_json;
+  struct json_object *search_key;
+
+  parsed_body_json = json_tokener_parse(request_body);
+
+  json_object_object_get_ex(parsed_body_json, "search_key", &search_key);
+  printf("%s\n", json_object_to_json_string(search_key));
+
+  return json_object_get_string(search_key);
+}
+
+const char *create_search_video_no_login_response(const char *search_key)
+{
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+
+  struct json_object *search_video_no_login_response = json_object_new_object();
+
+  conn = mysql_init(NULL);
+
+  char query_string[255];
+  strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.privacy = \"public\" and youtok.videos.title like \"%");
+  strcat(query_string, search_key);
+  strcat(query_string, "%\";");
+  printf("%s\n", query_string);
+
+  if (!mysql_real_connect(conn, SERVER, USER, PASSWORD, DATABASE, 0, NULL, 0))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+
+  if (mysql_query(conn, query_string))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+
+  res = mysql_store_result(conn);
+
+  struct json_object *videos_list = json_object_new_array();
+
+  if (mysql_num_rows(res) > 0)
+  {
+    printf("Fetch successfully!\n");
+    while ((row = mysql_fetch_row(res)) != NULL)
+    {
+      char id[10];
+      char user_id[10];
+      char title[255];
+      char description[255];
+      char privacy[30];
+      char filename[255];
+      char content_type[10];
+      char byte_size[10];
+      char create_at[20];
+      char author_name[50];
+
+      strcpy(id, row[0]);
+      strcpy(user_id, row[1]);
+      strcpy(title, row[2]);
+      strcpy(description, row[3]);
+      strcpy(privacy, row[4]);
+      strcpy(filename, row[5]);
+      strcpy(content_type, row[6]);
+      strcpy(byte_size, row[7]);
+      strcpy(create_at, row[8]);
+      strcpy(author_name, row[9]);
+
+      struct json_object *video = json_object_new_object();
+
+      json_object_object_add(video, "id", json_object_new_string(id));
+      json_object_object_add(video, "user_id", json_object_new_string(user_id));
+      json_object_object_add(video, "author_name", json_object_new_string(author_name));
+      json_object_object_add(video, "title", json_object_new_string(title));
+      json_object_object_add(video, "description", json_object_new_string(description));
+      json_object_object_add(video, "privacy", json_object_new_string(privacy));
+      json_object_object_add(video, "filename", json_object_new_string(filename));
+      json_object_object_add(video, "content_type", json_object_new_string(content_type));
+      json_object_object_add(video, "byte_size", json_object_new_string(byte_size));
+      json_object_object_add(video, "create_at", json_object_new_string(create_at));
+
+      json_object_array_add(videos_list, video);
+    }
+  }
+
+  json_object_object_add(search_video_no_login_response, "head", json_object_new_string("search_video_no_login_response"));
+
+  struct json_object *body_object = json_object_new_object();
+
+  json_object_object_add(body_object, "videos_list", videos_list);
+
+  json_object_object_add(search_video_no_login_response, "body", body_object);
+
+  mysql_free_result(res);
+  mysql_close(conn);
+
+  return json_object_to_json_string(search_video_no_login_response);
 }
 
 void receive_image(int connfd, const char *filename)
@@ -216,6 +323,7 @@ const char *create_upload_new_video_response(
 
   conn = mysql_init(NULL);
 
+  srand(time(NULL));
   char query_string[1024];
 
   strcpy(query_string, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (");
@@ -486,13 +594,6 @@ const char *create_fetch_all_videos_no_login_response()
       json_object_array_add(videos_list, video);
     }
   }
-  else
-  {
-    printf("Fetch failed!\n");
-    mysql_free_result(res);
-    mysql_close(conn);
-    return NULL;
-  }
 
   json_object_object_add(fetch_all_videos_no_login_response, "head", json_object_new_string("fetch_all_videos_no_login_response"));
 
@@ -594,13 +695,6 @@ const char *create_fetch_all_videos_has_login_response(const char *user_id)
 
       json_object_array_add(videos_list, video);
     }
-  }
-  else
-  {
-    printf("Fetch failed!\n");
-    mysql_free_result(res);
-    mysql_close(conn);
-    return NULL;
   }
 
   json_object_object_add(fetch_all_videos_has_login_response, "head", json_object_new_string("fetch_all_videos_has_login_response"));

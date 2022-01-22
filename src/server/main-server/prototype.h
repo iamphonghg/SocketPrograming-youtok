@@ -48,4 +48,7 @@ const char *create_upload_new_video_response(
   const char *byte_size
 );
 
+const char *get_search_key(const char *request_body);
+const char *create_search_video_no_login_response(const char *search_key);
+
 void *handle_request(void *client_socket);
