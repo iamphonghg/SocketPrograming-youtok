@@ -37,6 +37,7 @@ public class MainController implements Initializable {
   public BorderPane homeBorderPane;
   @FXML
   private BorderPane loginBorderPane;
+  private BorderPane searchBorderPane;
   @FXML
   private BorderPane uploadBorderPane;
   @FXML
@@ -46,6 +47,7 @@ public class MainController implements Initializable {
   public static UploadProcessController uploadProcessController;
   public static HomeController homeController;
   public static WatchVideoController watchVideoController;
+  public static SearchController searchController;
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -89,7 +91,15 @@ public class MainController implements Initializable {
       ));
       loginBorderPane = loginLoader.load();
 
+      FXMLLoader searchLoader = new FXMLLoader();
+      searchLoader.setLocation(getClass().getResource(
+        "../fxml/result-search.fxml"
+      ));
+      searchBorderPane = searchLoader.load();
+      searchController = searchLoader.getController();
 
+
+      mainStackPane.getChildren().add(searchBorderPane);
       mainStackPane.getChildren().add(watchVideoBorderPane);
       mainStackPane.getChildren().add(uploadBorderPane);
       mainStackPane.getChildren().add(uploadProcessBorderPane);
@@ -111,7 +121,8 @@ public class MainController implements Initializable {
       HomeController.updateVideoList();
       homeBorderPane.toFront();
     } else if (event.getSource() == searchButton) {
-      requestSearch();
+      SearchController.updateSearchResultList(this.searchInput.getText());
+      searchBorderPane.toFront();
     } else if (event.getSource() == uploadButton) {
       System.out.println("true");
       uploadBorderPane.toFront();
@@ -124,18 +135,5 @@ public class MainController implements Initializable {
     userMenuButton.setVisible(true);
   }
 
-  private void requestSearch() throws IOException {
-//        InetAddress ip = InetAddress.getLocalHost();
-//        String requestMessage = "SEARCHVIDEO|...";
-//        byte[] requestBuffer = requestMessage.getBytes();
-//        byte[] responseBuffer = new byte[1024];
-//
-//        DatagramPacket datagramPacketSend = new DatagramPacket(requestBuffer, requestBuffer.length, ip, 9999);
-//        UDPClient.socket.send(datagramPacketSend);
-//
-//        DatagramPacket datagramPacketReceive = new DatagramPacket(responseBuffer, responseBuffer.length);
-//        UDPClient.socket.receive(datagramPacketReceive);
-//        String responseMessage = new String(responseBuffer, 0, datagramPacketReceive.getLength());
-//        System.out.println(responseMessage);
-  }
+
 }

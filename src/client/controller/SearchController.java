@@ -4,17 +4,9 @@ import client.main.Main;
 import client.model.UserSession;
 import client.model.Video;
 import client.model.VideoButton;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -29,62 +21,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class HomeController implements Initializable {
-  @FXML
-  private ScrollPane videoListScrollPane;
-  private static GridPane videoListGridPane;
+public class SearchController implements Initializable {
 
+  @FXML
+  private ScrollPane resultVideoListScrollPane;
+
+  private static VBox resultVideoListVBox;
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
-    videoListGridPane = new GridPane();
-    videoListScrollPane.setContent(videoListGridPane);
-    videoListGridPane.setPadding(new Insets(20));
-    videoListGridPane.setHgap(20);
-    videoListGridPane.setVgap(20);
-    ColumnConstraints col1 = new ColumnConstraints();
-    col1.setPercentWidth(25);
-    videoListGridPane.getColumnConstraints().setAll(
-      col1
-    );
+    resultVideoListVBox = new VBox();
+    resultVideoListScrollPane.setContent(resultVideoListVBox);
 
-    try {
-      updateVideoList();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
-  public static void updateVideoList() throws IOException {
-    List<Video> videos = fetchAllVideos();
-
-    List<VideoButton> buttonList = new ArrayList<>();
-    for (Video video : videos) {
-      VideoButton videoButton = new VideoButton(
-        video.getTitle(),
-        video.getAuthorName(),
-        video.getFilename()
-      );
-      System.out.println(video.getFilename());
-      buttonList.add(videoButton);
-    }
-    int COLS = 4;
-    int videoNums = videos.size();
-    int count = 0;
-    for (int i = 0; i < videoNums / COLS + 1; i++) {
-      for (int j = 0; j < COLS; j++) {
-        if (count == videoNums)
-          break;
-        VideoButton tempButton = buttonList.get(count);
-        videoListGridPane.add(tempButton, j, i);
-        GridPane.setHgrow(tempButton, Priority.ALWAYS);
-
-        count++;
+  public static void updateSearchResultList(String searchKey) throws IOException {
+    resultVideoListVBox.getChildren().clear();
+    List<Video> videos = requestSearchVideo(searchKey);
+    if (videos.size() > 0) {
+      for (Video video : videos) {
+        VideoButton videoButton = new VideoButton(
+          video.getTitle(),
+          video.getAuthorName(),
+          video.getFilename()
+        );
+        System.out.println(video.getFilename());
+        resultVideoListVBox.getChildren().add(videoButton);
       }
     }
 
   }
 
-  public static List<Video> fetchAllVideos() throws IOException {
+  public static List<Video> requestSearchVideo(String searchKey) throws IOException {
     Socket socket = new Socket(Main.SERVER_IP, 1472);
     DataOutputStream dataOutputStream = new DataOutputStream(
       socket.getOutputStream()
@@ -94,23 +61,25 @@ public class HomeController implements Initializable {
     byte[] bufferReceive = new byte[4096];
 
     JSONObject request = new JSONObject();
+
     if (UserSession.getUserSession().getUser() == null) {
-      request.put("head", "fetch_all_videos_no_login");
+      request.put("head", "search_video_no_login");
     } else {
-      request.put("head", "fetch_all_videos_has_login");
+      request.put("head", "search_video_has_login");
     }
+
     JSONObject requestBody = new JSONObject();
+    requestBody.put("search_key", searchKey);
 
     if (UserSession.getUserSession().getUser() == null) {
       requestBody.put("body", null);
     } else {
-      JSONObject userId = new JSONObject();
-      userId.put(
+      requestBody.put(
         "user_id",
         UserSession.getUserSession().getUser().getId()
       );
-      request.put("body", userId);
     }
+    request.put("body", requestBody);
     bufferSend = request.toJSONString().getBytes();
 
     dataOutputStream.write(bufferSend);
