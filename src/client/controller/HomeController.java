@@ -1,6 +1,7 @@
 package client.controller;
 
 import client.main.Main;
+import client.model.UserSession;
 import client.model.Video;
 import client.model.VideoButton;
 import javafx.event.EventHandler;
@@ -31,7 +32,7 @@ import java.util.ResourceBundle;
 public class HomeController implements Initializable {
   @FXML
   private ScrollPane videoListScrollPane;
-  private GridPane videoListGridPane;
+  private static GridPane videoListGridPane;
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -53,7 +54,7 @@ public class HomeController implements Initializable {
     }
   }
 
-  public void updateVideoList() throws IOException {
+  public static void updateVideoList() throws IOException {
     List<Video> videos = fetchAllVideos();
 //    for (Video video : videos) {
 //      Button button = new Button(video.getTitle());
@@ -78,7 +79,7 @@ public class HomeController implements Initializable {
     for (Video video : videos) {
       VideoButton videoButton = new VideoButton(
         video.getTitle(),
-        "Author ",
+        video.getAuthorName(),
         video.getFilename()
       );
       System.out.println(video.getFilename());
@@ -101,7 +102,7 @@ public class HomeController implements Initializable {
 
   }
 
-  public List<Video> fetchAllVideos() throws IOException {
+  public static List<Video> fetchAllVideos() throws IOException {
     Socket socket = new Socket(Main.SERVER_IP, 1472);
     DataOutputStream dataOutputStream = new DataOutputStream(
       socket.getOutputStream()
@@ -111,9 +112,23 @@ public class HomeController implements Initializable {
     byte[] bufferReceive = new byte[4096];
 
     JSONObject request = new JSONObject();
-    request.put("head", "fetch_all_videos");
+    if (UserSession.getUserSession().getUser() == null) {
+      request.put("head", "fetch_all_videos_no_login");
+    } else {
+      request.put("head", "fetch_all_videos_has_login");
+    }
     JSONObject requestBody = new JSONObject();
-    request.put("body", null);
+
+    if (UserSession.getUserSession().getUser() == null) {
+      requestBody.put("body", null);
+    } else {
+      JSONObject userId = new JSONObject();
+      userId.put(
+        "user_id",
+        UserSession.getUserSession().getUser().getId()
+      );
+      request.put("body", userId);
+    }
     bufferSend = request.toJSONString().getBytes();
 
     dataOutputStream.write(bufferSend);
@@ -148,8 +163,8 @@ public class HomeController implements Initializable {
           .toString();
       String privacy = ((JSONObject) video).get("privacy").toString();
       String filename = ((JSONObject) video).get("filename").toString();
-
-      Video newVideo = new Video(id, title, description, privacy, filename);
+      String authorName = ((JSONObject) video).get("author_name").toString();
+      Video newVideo = new Video(id, title, description, privacy, filename, authorName);
       videos.add(newVideo);
     }
 

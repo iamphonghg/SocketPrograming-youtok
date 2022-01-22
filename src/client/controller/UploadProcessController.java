@@ -1,10 +1,13 @@
 package client.controller;
 
+import client.main.Main;
+import client.model.UserSession;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.net.Socket;
@@ -71,7 +74,32 @@ public class UploadProcessController implements Initializable {
   }
 
   public void uploadFile(File fileToUpload, long fileSize) throws IOException, InterruptedException {
-    Socket socket = new Socket("127.0.0.1", 1555);
+    Socket socket = new Socket(Main.SERVER_IP, 1472);
+    DataOutputStream dataOutputStream = new DataOutputStream(
+      socket.getOutputStream()
+    );
+
+    byte[] bufferSend = null;
+
+    JSONObject request = new JSONObject();
+    request.put("head", "upload_new_video");
+    JSONObject requestBody = new JSONObject();
+    requestBody.put("user_id", UserSession.getUserSession().getUser().getId());
+    requestBody.put("title", this.titleTextArea.getText());
+    requestBody.put("description", this.descriptionTextArea.getText());
+    if (this.privateRadioButton.isSelected()) {
+      requestBody.put("privacy", "private");
+    } else {
+      requestBody.put("privacy", "public");
+    }
+    requestBody.put("byte_size", fileToUpload.length());
+    requestBody.put("filename", fileToUpload.getName());
+    request.put("body", requestBody);
+    bufferSend = request.toJSONString().getBytes();
+
+    dataOutputStream.write(bufferSend);
+    dataOutputStream.flush();
+
     byte[] bytes = new byte[1024];
 
     FileInputStream fileInputStream = new FileInputStream(fileToUpload);

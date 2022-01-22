@@ -45,7 +45,6 @@ const char *insert_video_upload(const char *body)
     json_object_object_get_ex(parsed_body_json, "description", &description);
     json_object_object_get_ex(parsed_body_json, "privacy", &privacy);
     json_object_object_get_ex(parsed_body_json, "filename", &filename);
-    json_object_object_get_ex(parsed_body_json, "content_type", &content_type);
     json_object_object_get_ex(parsed_body_json, "byte_size", &byte_size);
 
     char query_string[1024];
@@ -61,12 +60,12 @@ const char *insert_video_upload(const char *body)
     strcat(query_string, "','");
     strcat(query_string, json_object_get_string(filename));
     strcat(query_string, "','");
-    strcat(query_string, json_object_get_string(content_type));
+    strcat(query_string, "mp4");
     strcat(query_string, "',");
     strcat(query_string, json_object_get_string(byte_size));
     strcat(query_string, ");");
     printf("%s\n",query_string);
-    
+
     if (!mysql_real_connect(conn, server, user, password, database, 0, NULL, 0))
     {
         fprintf(stderr, "%s\n", mysql_error(conn));

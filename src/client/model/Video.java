@@ -6,16 +6,24 @@ public class Video {
   private String description;
   private String privacy;
   private String filename;
-
+  private String authorName;
   public Video() {
   }
 
-  public Video(String id, String title, String description, String privacy, String filename) {
+  public Video(
+    String id,
+    String title,
+    String description,
+    String privacy,
+    String filename,
+    String authorName
+  ) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.privacy = privacy;
     this.filename = filename;
+    this.authorName = authorName;
   }
 
   public String getId() {
@@ -56,5 +64,13 @@ public class Video {
 
   public void setFilename(String filename) {
     this.filename = filename;
+  }
+
+  public String getAuthorName() {
+    return authorName;
+  }
+
+  public void setAuthorName(String authorName) {
+    this.authorName = authorName;
   }
 }

@@ -108,6 +108,7 @@ public class MainController implements Initializable {
     if (event.getSource() == loginButton) {
       loginBorderPane.toFront();
     } else if (event.getSource() == logoImageView) {
+      HomeController.updateVideoList();
       homeBorderPane.toFront();
     } else if (event.getSource() == searchButton) {
       requestSearch();

@@ -92,6 +92,17 @@ void seedUser(MYSQL *conn)
   {
     printf("Successfully added user\n");
   }
+  if (mysql_query(
+    conn,
+    "INSERT INTO `users` (`full_name`, `username`, `password`) VALUES ('Huan Hoa Tu', 'huanhoahong', 'huanhoahong')"))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+  else
+  {
+    printf("Successfully added user\n");
+  }
 }
 
 void seedVideo(MYSQL *conn)
@@ -105,7 +116,7 @@ void seedVideo(MYSQL *conn)
   {
     printf("Successfully added video\n");
   }
-  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (1, 'Thuat toan khong kho', 'Video day thuat toan cua thay giao Pham Tuan Duc', 'public', 'thuattoankhongkho.mp4', 'mp4', 4096)"))
+  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (1, 'Thuat toan khong kho', 'Video day thuat toan cua thay giao Pham Tuan Duc', 'private', 'thuattoankhongkho.mp4', 'mp4', 4096)"))
   {
     fprintf(stderr, "%s\n", mysql_error(conn));
     exit(1);
@@ -125,7 +136,7 @@ void seedVideo(MYSQL *conn)
     printf("Successfully added video\n");
   }
 
-  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (2, 'Lam giau khong kho', 'Bi kip lam giau cua thay Huan Hoa Hong', 'public', 'lamgiaukhongkho.mp4', 'mp4', 10248)"))
+  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (2, 'Tuyet chieu lam moi chiec laptop cua ban', 'Sieu bi kip lam moi laptop cua anh Thinh Hoa Hong', 'public', 'lamgiaukhongkho.mp4', 'mp4', 10248)"))
   {
     fprintf(stderr, "%s\n", mysql_error(conn));
     exit(1);
@@ -135,7 +146,7 @@ void seedVideo(MYSQL *conn)
     printf("Successfully added video\n");
   }
 
-  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (2, 'Day con lam giau', 'Cach day con lam giau cua doanh nhan Hoang Trong Nghien', 'public', 'dayconlamgiau.mp4', 'mp4', 10248)"))
+  if (mysql_query(conn, "INSERT INTO videos (user_id, title, description, privacy, filename, content_type, byte_size) VALUES (2, 'Day con lam giau', 'Cach day con lam giau cua doanh nhan Hoang Trong Nghien', 'private', 'dayconlamgiau.mp4', 'mp4', 10248)"))
   {
     fprintf(stderr, "%s\n", mysql_error(conn));
     exit(1);
