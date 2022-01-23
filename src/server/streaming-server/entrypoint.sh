@@ -6,7 +6,7 @@ gcc -o stream2 stream2.c `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 g
 gcc -o stream3 stream3.c `pkg-config --cflags --libs gstreamer-rtsp-server-1.0 gstreamer-1.0`
 
 # execute code
-./stream "( filesrc location=\test.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 )"
+./stream "( filesrc location=storage/thuattoankhongkho.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 )"
 ./stream2 "( filesrc location=\test.mp4 ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 )"
 
 ffmpeg -fflags nobuffer \

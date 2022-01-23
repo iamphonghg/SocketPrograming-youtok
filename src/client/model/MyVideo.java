@@ -79,11 +79,17 @@ public class MyVideo extends HBox {
         } catch (IOException e) {
           e.printStackTrace();
         }
+
       }
     });
   }
 
   private void requestChangePrivacy() throws IOException {
+    if (this.getPrivacy().equals("public")) {
+      buttonChangePrivacy.setText("Make video public");
+    } else {
+      buttonChangePrivacy.setText("Make video private");
+    }
     String newPrivacy = "";
     if (this.getPrivacy().equals("public")) {
       newPrivacy = "private";

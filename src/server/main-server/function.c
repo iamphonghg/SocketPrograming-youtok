@@ -23,7 +23,7 @@ void *start_stream(void *filenameInput)
   GstRTSPMountPoints *mounts;
   GstRTSPMediaFactory *factory;
   char source[250];
-  strcpy(source, "( filesrc location=\\");
+  strcpy(source, "( filesrc location=storage/");
   strcat(source, filename);
   strcat(source, " ! qtdemux ! h264parse ! rtph264pay name=pay0 pt=96 )");
 
@@ -118,15 +118,11 @@ void *handle_request(void *client_socket)
   }
   else if (strcmp(request_head, "watch_video") == 0)
   {
-    // response = create_watch_video_response(request_body, no_threads);
-    // write(connfd, response, strlen(response));
-    // char filename[100];
-    // strcpy(filename, get_filename_string(request_body));
-    // if (pthread_create(&threads[no_threads], NULL, start_stream, filename) < 0)
-    // {
-    //   perror("Could not create thread");
-    //   return 1;
-    // }
+    response = create_watch_video_response(request_body, 1);
+    write(connfd, response, strlen(response));
+    char filename[100];
+    strcpy(filename, get_filename_string(request_body));
+    start_stream(filename);
   }
   else if (strcmp(request_head, "cancel_stream") == 0)
   {
