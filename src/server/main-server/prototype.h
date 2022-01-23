@@ -50,5 +50,12 @@ const char *create_upload_new_video_response(
 
 const char *get_search_key(const char *request_body);
 const char *create_search_video_no_login_response(const char *search_key);
+const char *create_search_video_has_login_response(const char *user_id, const char *search_key);
+
+const char *create_my_video_response(const char *user_id);
 
 void *handle_request(void *client_socket);
+
+void *update_privacy(const char *video_id, const char *privacy);
+const char *get_privacy(const char *request_body);
+const char *get_video_id(const char *request_body);

@@ -1,10 +1,13 @@
 package client.controller;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -43,11 +46,13 @@ public class MainController implements Initializable {
   @FXML
   public BorderPane watchVideoBorderPane;
   public BorderPane uploadProcessBorderPane;
+  public BorderPane myVideoBorderPane;
 
   public static UploadProcessController uploadProcessController;
   public static HomeController homeController;
   public static WatchVideoController watchVideoController;
   public static SearchController searchController;
+  public static MyVideoController myVideoController;
 
   @Override
   public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -98,7 +103,14 @@ public class MainController implements Initializable {
       searchBorderPane = searchLoader.load();
       searchController = searchLoader.getController();
 
+      FXMLLoader myVideoLoader = new FXMLLoader();
+      myVideoLoader.setLocation(getClass().getResource(
+        "../fxml/my-video.fxml"
+      ));
+      myVideoBorderPane = myVideoLoader.load();
+      myVideoController = myVideoLoader.getController();
 
+      mainStackPane.getChildren().add(myVideoBorderPane);
       mainStackPane.getChildren().add(searchBorderPane);
       mainStackPane.getChildren().add(watchVideoBorderPane);
       mainStackPane.getChildren().add(uploadBorderPane);
@@ -108,6 +120,24 @@ public class MainController implements Initializable {
 
       uploadButton.setVisible(false);
       userMenuButton.setVisible(false);
+
+      MenuItem myVideoChoice = new MenuItem("My videos");
+      MenuItem logOutChoice = new MenuItem("Log out");
+      userMenuButton.getItems().clear();
+      userMenuButton.getItems().add(myVideoChoice);
+      userMenuButton.getItems().add(logOutChoice);
+
+      myVideoChoice.setOnAction(new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent actionEvent) {
+          try {
+            MyVideoController.updateMyVideoList();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          myVideoBorderPane.toFront();
+        }
+      });
 
     } catch (IOException e) {
       e.printStackTrace();

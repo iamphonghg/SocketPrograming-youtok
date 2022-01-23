@@ -100,6 +100,22 @@ void *handle_request(void *client_socket)
     response = create_search_video_no_login_response(search_key);
     write(connfd, response, strlen(response));
   }
+  else if (strcmp(request_head, "search_video_has_login") == 0) {
+    const char *user_id = get_current_user_id(request_body);
+    const char *search_key = get_search_key(request_body);
+    response = create_search_video_has_login_response(user_id, search_key);
+    write(connfd, response, strlen(response));
+  }
+  else if (strcmp(request_head, "my_video") == 0) {
+    const char *user_id = get_current_user_id(request_body);
+    response = create_my_video_response(user_id);
+    write(connfd, response, strlen(response));
+  }
+  else if (strcmp(request_head, "update_privacy") == 0) {
+    const char *video_id = get_video_id(request_body);
+    const char *privacy = get_privacy(request_body);
+    update_privacy(video_id, privacy);
+  }
   else if (strcmp(request_head, "watch_video") == 0)
   {
     // response = create_watch_video_response(request_body, no_threads);
@@ -127,18 +143,156 @@ void *handle_request(void *client_socket)
   }
 }
 
-const char *rand_text(const char *file) {
-    char *result;
-    result = (char*)malloc(sizeof(char*)*11 + strlen(file));
-    int i, rand_int;
-    char char_set[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&quot";
+const char *get_video_id(const char *request_body) {
+  struct json_object *parsed_body_json;
+  struct json_object *video_id;
 
-    for (i = 0; i <9; i++) {
-        result[i] = char_set[rand() % sizeof(char_set)];
+  parsed_body_json = json_tokener_parse(request_body);
+
+  json_object_object_get_ex(parsed_body_json, "video_id", &video_id);
+  printf("%s\n", json_object_to_json_string(video_id));
+
+  return json_object_get_string(video_id);
+}
+
+const char *get_privacy(const char *request_body) {
+  struct json_object *parsed_body_json;
+  struct json_object *privacy;
+
+  parsed_body_json = json_tokener_parse(request_body);
+
+  json_object_object_get_ex(parsed_body_json, "privacy", &privacy);
+  printf("%s\n", json_object_to_json_string(privacy));
+
+  return json_object_get_string(privacy);
+}
+
+void *update_privacy(const char *video_id, const char *privacy) {
+  MYSQL *conn;
+  MYSQL_RES *res;
+  conn = mysql_init(NULL);
+
+  char query_string[255];
+
+  strcpy(query_string, "update youtok.videos set youtok.videos.privacy = \"");
+  strcat(query_string, privacy);
+  strcat(query_string, "\" where id = ");
+  strcat(query_string, video_id);
+  strcat(query_string, ";");
+
+  printf("%s\n", query_string);
+
+  if (!mysql_real_connect(conn, SERVER, USER, PASSWORD, DATABASE, 0, NULL, 0))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+
+  if (mysql_query(conn, query_string))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+  }
+}
+
+const char *create_my_video_response(const char *user_id)
+{
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+
+  struct json_object *my_video_response = json_object_new_object();
+
+  conn = mysql_init(NULL);
+
+  char query_string[255];
+  strcpy(query_string, "select * from youtok.videos where youtok.videos.user_id = ");
+  strcat(query_string, user_id);
+  strcat(query_string, ";");
+
+  if (!mysql_real_connect(conn, SERVER, USER, PASSWORD, DATABASE, 0, NULL, 0))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+
+  if (mysql_query(conn, query_string))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+
+  res = mysql_store_result(conn);
+
+  struct json_object *videos_list = json_object_new_array();
+
+  if (mysql_num_rows(res) > 0)
+  {
+    printf("successfully!\n");
+    while ((row = mysql_fetch_row(res)) != NULL)
+    {
+      char id[10];
+      char user_id[10];
+      char title[255];
+      char description[255];
+      char privacy[30];
+      char filename[255];
+      char content_type[10];
+      char byte_size[10];
+      char create_at[20];
+
+      strcpy(id, row[0]);
+      strcpy(user_id, row[1]);
+      strcpy(title, row[2]);
+      strcpy(description, row[3]);
+      strcpy(privacy, row[4]);
+      strcpy(filename, row[5]);
+      strcpy(content_type, row[6]);
+      strcpy(byte_size, row[7]);
+      strcpy(create_at, row[8]);
+
+      struct json_object *video = json_object_new_object();
+
+      json_object_object_add(video, "id", json_object_new_string(id));
+      json_object_object_add(video, "user_id", json_object_new_string(user_id));
+      json_object_object_add(video, "title", json_object_new_string(title));
+      json_object_object_add(video, "description", json_object_new_string(description));
+      json_object_object_add(video, "privacy", json_object_new_string(privacy));
+      json_object_object_add(video, "filename", json_object_new_string(filename));
+      json_object_object_add(video, "content_type", json_object_new_string(content_type));
+      json_object_object_add(video, "byte_size", json_object_new_string(byte_size));
+      json_object_object_add(video, "create_at", json_object_new_string(create_at));
+
+      json_object_array_add(videos_list, video);
     }
-    result[9] = '-';
-    strcat(result,file);
-    return result;
+  }
+
+  struct json_object *body_object = json_object_new_object();
+
+  json_object_object_add(body_object, "videos_list", videos_list);
+
+  json_object_object_add(my_video_response, "body", body_object);
+
+  mysql_free_result(res);
+  mysql_close(conn);
+
+  return json_object_to_json_string(my_video_response);
+}
+
+const char *
+rand_text(const char *file)
+{
+  char *result;
+  result = (char *)malloc(sizeof(char *) * 11 + strlen(file));
+  int i, rand_int;
+  char char_set[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&quot";
+
+  for (i = 0; i < 9; i++)
+  {
+    result[i] = char_set[rand() % sizeof(char_set)];
+  }
+  result[9] = '-';
+  strcat(result, file);
+  return result;
 }
 
 const char *get_search_key(const char *request_body) {
@@ -151,6 +305,99 @@ const char *get_search_key(const char *request_body) {
   printf("%s\n", json_object_to_json_string(search_key));
 
   return json_object_get_string(search_key);
+}
+
+const char *create_search_video_has_login_response(const char *user_id, const char *search_key)
+{
+  MYSQL *conn;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+
+  struct json_object *search_video_has_login_response = json_object_new_object();
+
+  conn = mysql_init(NULL);
+
+  char query_string[255];
+  strcpy(query_string, "select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and  youtok.videos.privacy = \"public\" and youtok.videos.title like \"%");
+  strcat(query_string, search_key);
+  strcat(query_string, "%\" union select videos.*,users.full_name FROM youtok.videos, youtok.users where youtok.videos.user_id = youtok.users.id and youtok.videos.user_id = ");
+  strcat(query_string, user_id);
+  strcat(query_string, " and youtok.videos.title like \"%");
+  strcat(query_string, search_key);
+  strcat(query_string, "%\";");
+
+  printf("%s\n", query_string);
+
+  if (!mysql_real_connect(conn, SERVER, USER, PASSWORD, DATABASE, 0, NULL, 0))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+
+  if (mysql_query(conn, query_string))
+  {
+    fprintf(stderr, "%s\n", mysql_error(conn));
+    exit(1);
+  }
+
+  res = mysql_store_result(conn);
+
+  struct json_object *videos_list = json_object_new_array();
+
+  if (mysql_num_rows(res) > 0)
+  {
+    printf("successfully!\n");
+    while ((row = mysql_fetch_row(res)) != NULL)
+    {
+      char id[10];
+      char user_id[10];
+      char title[255];
+      char description[255];
+      char privacy[30];
+      char filename[255];
+      char content_type[10];
+      char byte_size[10];
+      char create_at[20];
+      char author_name[50];
+
+      strcpy(id, row[0]);
+      strcpy(user_id, row[1]);
+      strcpy(title, row[2]);
+      strcpy(description, row[3]);
+      strcpy(privacy, row[4]);
+      strcpy(filename, row[5]);
+      strcpy(content_type, row[6]);
+      strcpy(byte_size, row[7]);
+      strcpy(create_at, row[8]);
+      strcpy(author_name, row[9]);
+
+      struct json_object *video = json_object_new_object();
+
+      json_object_object_add(video, "id", json_object_new_string(id));
+      json_object_object_add(video, "user_id", json_object_new_string(user_id));
+      json_object_object_add(video, "author_name", json_object_new_string(author_name));
+      json_object_object_add(video, "title", json_object_new_string(title));
+      json_object_object_add(video, "description", json_object_new_string(description));
+      json_object_object_add(video, "privacy", json_object_new_string(privacy));
+      json_object_object_add(video, "filename", json_object_new_string(filename));
+      json_object_object_add(video, "content_type", json_object_new_string(content_type));
+      json_object_object_add(video, "byte_size", json_object_new_string(byte_size));
+      json_object_object_add(video, "create_at", json_object_new_string(create_at));
+
+      json_object_array_add(videos_list, video);
+    }
+  }
+
+  struct json_object *body_object = json_object_new_object();
+
+  json_object_object_add(body_object, "videos_list", videos_list);
+
+  json_object_object_add(search_video_has_login_response, "body", body_object);
+
+  mysql_free_result(res);
+  mysql_close(conn);
+
+  return json_object_to_json_string(search_video_has_login_response);
 }
 
 const char *create_search_video_no_login_response(const char *search_key)
