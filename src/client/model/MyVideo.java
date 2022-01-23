@@ -104,7 +104,7 @@ public class MyVideo extends HBox {
 
     JSONObject requestBody = new JSONObject();
     requestBody.put("video_id", this.getVideoId());
-    requestBody.put("privacy", this.getPrivacy());
+    requestBody.put("privacy", newPrivacy);
 
     request.put("body", requestBody);
 
