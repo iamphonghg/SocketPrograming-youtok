@@ -88,7 +88,7 @@ public class MyVideo extends HBox {
     if (this.getPrivacy().equals("public")) {
       newPrivacy = "private";
     } else {
-      newPrivacy = "private";
+      newPrivacy = "public";
     }
     Socket socket = new Socket(Main.SERVER_IP, 1472);
     DataOutputStream dataOutputStream = new DataOutputStream(
